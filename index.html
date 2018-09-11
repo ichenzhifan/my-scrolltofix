@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<link rel="stylesheet" href="">
+	<style>
+		html,body{
+			margin: 0;
+			padding: 0;
+		}
+		header{
+			height: 70px;
+			background: #000;
+		}
+		footer{
+			height: 200px;
+			background: red;
+		}
+		.box{
+			overflow: hidden;
+		}
+		.content{
+			height: 3000px;
+			display: inline-block;
+			float:  left;
+		}
+		.sidebar{
+			margin-left: 50px;
+			background: blue;
+			display: inline-block;
+			float: left;
+		}
+	</style>
+</head>
+<body>
+	<header></header>
+	<div class="box">
+		<div class="sidebar"></div>
+		<div class="content">test</div>
+	</div>
+	<footer></footer>
+
+	<script>
+		const headerHeight = 70;
+		const footerHeight = 200;
+
+		function getToBottomInfo(sideBarNode){
+			const winHeight = window.innerHeight;
+			const scrollHeight = window.scrollY;
+			const sideBarHeight = sideBarNode.offsetHeight;
+
+			return {
+				isToBottom: winHeight + scrollHeight - headerHeight >= sideBarHeight,
+				top: -(sideBarHeight - winHeight)
+			};
+		}
+
+		// 获取容器距离底部的距离.
+		function getOffsetBottomHeight(node){
+			return document.body.offsetHeight - window.innerHeight - window.scrollY; 
+		}
+
+		function isFooterInVisibility(container){
+			const offsetBottom = getOffsetBottomHeight(container);
+
+			return offsetBottom <= footerHeight;
+		}
+
+		function isHeaderInVisibility(){
+			return window.scrollY <= headerHeight;
+		}
+
+		let lastY = 0;
+		function getScrollDetalY(){
+			const delta = window.scrollY - lastY;
+			lastY = window.scrollY;
+
+			return delta;
+		}
+
+		function isSidebarToTop(){
+			return window.scrollY === 0;
+		}
+
+		function init(){
+			var oSidebar = document.querySelector('.sidebar');
+			var oContent = document.querySelector('.content');
+
+
+			var html='';
+			for(var i=0; i<10; i++){
+				html += '<h3> Text: ' + i + '</h3>'
+			}
+
+			oSidebar.innerHTML = html;
+
+			let flag = false;
+			let marginTop = 0;
+			window.onscroll = function(){
+				if(oSidebar.offsetHeight <= window.innerHeight - headerHeight){
+					return;
+				}
+
+				const info = getToBottomInfo(oSidebar);
+				const isToTop = isSidebarToTop();
+
+				const deltaY = getScrollDetalY();
+
+				if(!flag && deltaY >0 && info.isToBottom){
+					oSidebar.style.position = 'fixed';
+					oSidebar.style.top = info.top + 'px';
+
+					if(isFooterInVisibility(oContent)){
+						oSidebar.style.position = 'static';
+						oSidebar.style.top = 0;
+
+						marginTop = info.top + deltaY;
+						oSidebar.style.marginTop = -marginTop + 'px';	
+						flag = true;
+					}
+				}
+
+				// 往上滚.
+				if(deltaY < 0){
+					// 表示不能再往上滚了, 否则顶部会出现空隙.
+					// 这时候需要钉住.
+					if(Math.abs(marginTop) >= window.scrollY - headerHeight){
+						oSidebar.style.position = 'fixed';
+						oSidebar.style.top = marginTop + 'px';
+
+						// 如果已经到顶部, 恢复文档流.
+						if(isHeaderInVisibility()){
+							oSidebar.style.position = 'static';
+							oSidebar.style.top = 0;
+							oSidebar.style.marginTop = 0;	
+							flag = false;
+						}
+					}
+				}
+			};
+		}
+
+		window.onload = init;
+	</script>
+</body>
+</html>
