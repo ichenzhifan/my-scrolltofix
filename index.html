@@ -1,148 +1,102 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title></title>
-	<link rel="stylesheet" href="">
-	<style>
-		html,body{
-			margin: 0;
-			padding: 0;
-		}
-		header{
-			height: 70px;
-			background: #000;
-		}
-		footer{
-			height: 200px;
-			background: red;
-		}
-		.box{
-			overflow: hidden;
-		}
-		.content{
-			height: 3000px;
-			display: inline-block;
-			float:  left;
-		}
-		.sidebar{
-			margin-left: 50px;
-			background: blue;
-			display: inline-block;
-			float: left;
-		}
-	</style>
-</head>
-<body>
-	<header></header>
-	<div class="box">
-		<div class="sidebar"></div>
-		<div class="content">test</div>
+
+<style type="text/css">
+	body {
+		padding: 0;
+		margin: 0;
+	}
+	header {
+		color: #fff;
+		font-size: 20px;
+		height: 60px;
+		line-height: 60px;
+		text-align: center;
+		box-sizing: border-box;
+		background-color: orange;
+	}
+	.content {
+		height: 3000px;
+	}
+	.sidebar {
+		/* height: 1500px; */
+		width: 200px;
+		background-color: #f00;
+	}
+	.sidebar div {
+		line-height: 38px;
+		font-size: 20px;
+		text-align: center;
+		color: #fff;
+	}
+	footer {
+		color: #fff;
+		font-size: 20px;
+		height: 200px;
+		line-height: 200px;
+		text-align: center;
+		box-sizing: border-box;
+		background-color: orange;
+	}
+</style>
+<header>
+	This is header
+</header>
+<section class="content">
+	<div class="sidebar" id="sidebar">
+		<div>1</div>
+		<div>2</div>
+		<div>3</div>
+		<div>4</div>
+		<div>5</div>
+		<div>6</div>
+		<div>7</div>
+		<div>8</div>
+		<div>9</div>
+		<div>10</div>
+		<div>11</div>
+		<div>12</div>
+		<div>13</div>
+		<div>14</div>
+		<div>15</div>
+		<div>16</div>
+		<div>17</div>
+		<div>18</div>
+		<div>19</div>
+		<div>20</div>
+		<div>21</div>
+		<div>22</div>
+		<div>23</div>
+		<div>24</div>
+		<div>25</div>
+		<div>26</div>
+		<div>27</div>
+		<div>28</div>
 	</div>
-	<footer></footer>
-
-	<script>
-		const headerHeight = 70;
-		const footerHeight = 200;
-
-		function getToBottomInfo(sideBarNode){
-			const winHeight = window.innerHeight;
-			const scrollHeight = window.scrollY;
-			const sideBarHeight = sideBarNode.offsetHeight;
-
-			return {
-				isToBottom: winHeight + scrollHeight - headerHeight >= sideBarHeight,
-				top: -(sideBarHeight - winHeight)
-			};
-		}
-
-		// 获取容器距离底部的距离.
-		function getOffsetBottomHeight(node){
-			return document.body.offsetHeight - window.innerHeight - window.scrollY; 
-		}
-
-		function isFooterInVisibility(container){
-			const offsetBottom = getOffsetBottomHeight(container);
-
-			return offsetBottom <= footerHeight;
-		}
-
-		function isHeaderInVisibility(){
-			return window.scrollY <= headerHeight;
-		}
-
-		let lastY = 0;
-		function getScrollDetalY(){
-			const delta = window.scrollY - lastY;
-			lastY = window.scrollY;
-
-			return delta;
-		}
-
-		function isSidebarToTop(){
-			return window.scrollY === 0;
-		}
-
-		function init(){
-			var oSidebar = document.querySelector('.sidebar');
-			var oContent = document.querySelector('.content');
-
-
-			var html='';
-			for(var i=0; i<10; i++){
-				html += '<h3> Text: ' + i + '</h3>'
+</section>
+<footer>
+	This is footer
+</footer>
+<script type="text/javascript">
+	function onScroll(node, limit, offset = 0) {
+		const nHeight = node.offsetHeight;
+		const wHeight = window.innerHeight;
+		const scrollTop = window.scrollY;
+		const bHeight = document.body.offsetHeight;
+		const triggerOffset = nHeight - (wHeight - limit.bottom) + offset;
+		const triggerTop = bHeight - triggerOffset;
+		if (scrollTop > limit.top) {
+			node.style.cssText = 'position: fixed;top:0;left: 0;';
+			if (scrollTop + wHeight > triggerTop) {
+				const offsetTop = triggerTop - (scrollTop + wHeight);
+				node.style.top = offsetTop + 'px';
 			}
-
-			oSidebar.innerHTML = html;
-
-			let flag = false;
-			let marginTop = 0;
-			window.onscroll = function(){
-				if(oSidebar.offsetHeight <= window.innerHeight - headerHeight){
-					return;
-				}
-
-				const info = getToBottomInfo(oSidebar);
-				const isToTop = isSidebarToTop();
-
-				const deltaY = getScrollDetalY();
-
-				if(!flag && deltaY >0 && info.isToBottom){
-					oSidebar.style.position = 'fixed';
-					oSidebar.style.top = info.top + 'px';
-
-					if(isFooterInVisibility(oContent)){
-						oSidebar.style.position = 'static';
-						oSidebar.style.top = 0;
-
-						marginTop = info.top + deltaY;
-						oSidebar.style.marginTop = -marginTop + 'px';	
-						flag = true;
-					}
-				}
-
-				// 往上滚.
-				if(deltaY < 0){
-					// 表示不能再往上滚了, 否则顶部会出现空隙.
-					// 这时候需要钉住.
-					if(Math.abs(marginTop) >= window.scrollY - headerHeight){
-						oSidebar.style.position = 'fixed';
-						oSidebar.style.top = marginTop + 'px';
-
-						// 如果已经到顶部, 恢复文档流.
-						if(isHeaderInVisibility()){
-							oSidebar.style.position = 'static';
-							oSidebar.style.top = 0;
-							oSidebar.style.marginTop = 0;	
-							flag = false;
-						}
-					}
-				}
-			};
+		} else {
+			node.style.cssText = 'position: static;';
 		}
-
-		window.onload = init;
-	</script>
-</body>
-</html>
+	}
+	window.onscroll = function() {
+		onScroll(sidebar, {
+			top: 60,
+			bottom: 200
+		}, 100);
+	}
+</script>
